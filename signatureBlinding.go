@@ -2,6 +2,7 @@ package bbs
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"fmt"
 	"math/big"
 )
@@ -10,17 +11,23 @@ type SignatureBlinding struct {
 	value *big.Int
 }
 
-func (m SignatureBlinding) ToBytes() []byte {
-	return m.ToBytes()
+func (m SignatureBlinding) Bytes() []byte {
+	return m.value.Bytes()
 }
 
-func (m *SignatureBlinding) FromBytes(data []byte) error {
+func (m *SignatureBlinding) SetBytes(data []byte) error {
 	if len(data) > FrUncompressedSize {
 		return fmt.Errorf("invalid length specified")
 	}
 	m.value.SetBytes(data)
 	m.value.Mod(m.value, fr)
 	return nil
+}
+
+func (m SignatureBlinding) Equal(rhs SignatureBlinding) bool {
+	l := m.value.Bytes()
+	r := rhs.value.Bytes()
+	return subtle.ConstantTimeCompare(l, r) == 0
 }
 
 func (m *SignatureBlinding) Hash(data []byte) {

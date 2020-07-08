@@ -67,6 +67,10 @@ func hashToFr(data []byte) *big.Int {
 	h, _ := blake2b.New384(nil)
 	_, _ = h.Write(data)
 	okm := h.Sum(nil)
+	return fromOkm(okm)
+}
+
+func fromOkm(okm []byte) *big.Int {
 	elm := new (big.Int).SetBytes(okm[:24])
 	elm.Mul(elm, f2192())
 	elm.Mod(elm, fr)

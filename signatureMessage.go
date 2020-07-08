@@ -2,6 +2,7 @@ package bbs
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"fmt"
 	"math/big"
 )
@@ -10,17 +11,23 @@ type SignatureMessage struct {
 	value *big.Int
 }
 
-func (m SignatureMessage) ToBytes() []byte {
-	return m.ToBytes()
+func (m SignatureMessage) Bytes() []byte {
+	return m.value.Bytes()
 }
 
-func (m *SignatureMessage) FromBytes(data []byte) error {
+func (m *SignatureMessage) SetBytes(data []byte) error {
 	if len(data) > FrUncompressedSize {
 		return fmt.Errorf("invalid length specified")
 	}
 	m.value.SetBytes(data)
 	m.value.Mod(m.value, fr)
 	return nil
+}
+
+func (m SignatureMessage) Equal(rhs SignatureMessage) bool {
+	l := m.value.Bytes()
+	r := rhs.value.Bytes()
+	return subtle.ConstantTimeCompare(l, r) == 0
 }
 
 func (m *SignatureMessage) Hash(data []byte) {

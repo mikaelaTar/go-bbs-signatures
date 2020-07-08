@@ -2,6 +2,7 @@ package bbs
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"fmt"
 	"math/big"
 )
@@ -21,6 +22,12 @@ func (p *ProofChallenge) FromBytes(data []byte) error {
 	p.value.SetBytes(data)
 	p.value.Mod(p.value, fr)
 	return nil
+}
+
+func (p ProofChallenge) Equal(rhs ProofChallenge) bool {
+	l := g1.ToCompressed(p.value)
+	r := g1.ToCompressed(rhs.value)
+	return subtle.ConstantTimeCompare(l, r) == 0
 }
 
 func (p *ProofChallenge) Hash(data []byte) {
