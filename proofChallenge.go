@@ -5,6 +5,8 @@ import (
 	"crypto/subtle"
 	"fmt"
 	"math/big"
+
+	bls12381 "github.com/mikelodder7/bls12-381"
 )
 
 type ProofChallenge struct {
@@ -25,8 +27,22 @@ func (p *ProofChallenge) FromBytes(data []byte) error {
 }
 
 func (p ProofChallenge) Equal(rhs ProofChallenge) bool {
-	l := g1.ToCompressed(p.value)
-	r := g1.ToCompressed(rhs.value)
+	lG1 := &bls12381.G1{}
+	lG1Bytes := p.value.Bytes()
+	lG1Point, err := lG1.FromBytes(lG1Bytes)
+	if err != nil {
+		return false
+	}
+	l := g1.ToCompressed(lG1Point)
+
+	rG1 := &bls12381.G1{}
+	rG1Bytes := rhs.value.Bytes()
+	rG1Point, err := rG1.FromBytes(rG1Bytes)
+	if err != nil {
+		return false
+	}
+	r := g1.ToCompressed(rG1Point)
+
 	return subtle.ConstantTimeCompare(l, r) == 0
 }
 
